@@ -28,15 +28,14 @@ class NytimesSpider(scrapy.Spider):
         cur.close()
         conn.close()
         self.start_urls = [x[0] for x in data]
-        # for x in data:
 
 
     def parse(self, response):
         soup = BeautifulSoup(response.body, 'lxml')
         item = NewsReportItem()
         try:
-            title = soup.select_one('h1')
-            item['title'] = Converter('zh-hans').convert(title.text)
+            title = soup.select('header > h1')[-1]
+            item['title'] = title.text
         except Exception as e:
             print(e)
             return
@@ -44,11 +43,11 @@ class NytimesSpider(scrapy.Spider):
         item['url'] = response.url
 
         # 获取正文内容
-        cl_names = ['.box_con', '#rwb_zw']
+        cl_names = ['.article-body-item']
         isCorrect = False
         content = []
         for cl in cl_names:
-            content = soup.select('%s > p' % cl)
+            content = soup.select('%s > div' % cl)
             # print(len(content))
             if len(content) > 0:
                 isCorrect = True
@@ -61,14 +60,13 @@ class NytimesSpider(scrapy.Spider):
         for line in content:
             item['content'] += line.text.strip().replace(u'\u3000',
                                                          ' ').replace(u'\xa0', ' ')
-        item['content'] = Converter('zh-hans').convert(item['content'])
+        # item['content'] = Converter('zh-hans').convert(item['content'])
         # print(item['content'])
 
         # 日期
-        date = soup.select_one('.box01 > .fl')
+        date = soup.select_one('time')
         if date is not None:
-            item['date'] = time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.strptime(date.text.lstrip()[0:16], r'%Y年%m月%d日%H:%M'))
+            item['date'] = date['datetime']
         # print(item['date'])
         yield item
         return
