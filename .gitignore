@@ -1,0 +1,10 @@
+*.pyc
+*.rdb
+.vscode
+.idea
+*.zip
+sk_learn.py
+project.egg-info
+build
+__pycache__
+setup.py
