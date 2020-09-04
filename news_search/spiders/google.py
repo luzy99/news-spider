@@ -3,6 +3,7 @@ import scrapy
 import time
 from bs4 import BeautifulSoup
 from ..items import SearchResultItem
+import re
 
 
 class GoogleSpider(scrapy.Spider):
@@ -15,7 +16,7 @@ class GoogleSpider(scrapy.Spider):
     }
     kw = ''  # 搜索关键词
     site = ''  # 搜索站点
-    altUrl = 'soo.panda321.com'
+    altUrl = 'www.google.com.hk'
     baseUrl = 'https://%s/search?q=site:{site}+{kw}&filter=0&num=100&sourceid=chrome' % altUrl
     page = 1
 
@@ -47,11 +48,23 @@ class GoogleSpider(scrapy.Spider):
         contents = soup.select('.r > a')
 
         for tag in contents:
+            # 过滤paper报纸
             if 'paper.people.com.cn' in tag['href']:
                 continue
             item['url'] = tag['href']
+
+            # 纽约时报
             if self.site == 'cn.nytimes.com':
                 item['url'] = self.nytimes_process(item['url'])
+
+            # 东方日报
+            if self.site == 'orientaldaily.on.cc':
+                item['url'] = self.orientaldaily_process(item['url'])
+
+            # 星岛
+            if self.site == 'singtaousa.com':
+                item['url'] = self.singtaousa_process(item['url'])
+
             item['site'] = self.site
             item['keyword'] = self.kw
             yield item
@@ -70,3 +83,15 @@ class GoogleSpider(scrapy.Spider):
 
     def nytimes_process(self, url):
         return url.replace("en-us/", "").replace("dual/", "").replace("zh-hant/", "")
+
+    def orientaldaily_process(self, url):
+        url = url.replace("http:", "https:")
+        if "translate.google.com" in url:
+            pat = re.compile(r"(?<=u=).*?(?=&)")
+            url = pat.search(url).group()
+        pattern = re.compile(r"mobile/odn-\d{8}-\d{4}_")
+        return pattern.sub("", url)
+
+    def singtaousa_process(self, url):
+        url = url.replace("http:", "https:")
+        return url

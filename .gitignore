@@ -8,3 +8,4 @@ project.egg-info
 build
 __pycache__
 setup.py
+output

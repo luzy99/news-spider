@@ -14,7 +14,7 @@ class GooglePipeline(object):
         self.cur = self.conn.cursor()
 
         sql = '''CREATE TABLE IF NOT EXISTS `job_news`.`{}`  (
-                `url` varchar(255) NOT NULL,
+                `url` varchar(1024) NOT NULL,
                 `site` varchar(255) NULL,
                 `keyword` varchar(255) NULL,
                 PRIMARY KEY (`url`)
@@ -43,8 +43,8 @@ class NewsSitePipeline(object):
 
         sql = '''CREATE TABLE IF NOT EXISTS `job_news`.`{}`  (
                 `title` varchar(255) NULL,
-                `url` varchar(255) NOT NULL,
-                `content` varchar(255) NULL,
+                `url` varchar(1024) NOT NULL,
+                `content` varchar(9555) NULL,
                 `date` timestamp(0) NULL,
                 PRIMARY KEY (`url`)
                 );'''.format(spider.name)
