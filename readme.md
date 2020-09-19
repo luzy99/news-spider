@@ -28,7 +28,7 @@
 2. 启动谷歌搜索爬虫
 
    ```sh
-   scrapy crawl google -a kw=xxx -a site=xxx
+   scrapy crawl google -a kw=关键词 -a site=站点网址
    ```
 
 3. 启动新闻站点爬虫
@@ -55,3 +55,14 @@
 
 ![词频](https://cdn.jsdelivr.net/gh/luzy99/cdn@latest/img/20200919223810.png)
 
+### 开发说明
+
+- 新增新闻站点爬虫
+
+  在项目根目录执行：
+
+  ```sh
+  scrapy genspider example example.com
+  ```
+
+  仿照`peopleNews.py`修改即可。
