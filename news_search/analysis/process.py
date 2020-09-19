@@ -20,14 +20,14 @@ import settings
 conn = pymysql.connect(host=settings.MYSQL_HOST, user=settings.MYSQL_USER,
                        passwd=settings.MYSQL_PASSWD, db=settings.MYSQL_DBNAME, charset='utf8')
 cur = conn.cursor()
-name = "peoplenews"
+name = "nytimes"
 '''
 peoplenews
 nytimes
 orientaldaily
 singtaousa
 '''
-ch_name = "人民日报"
+ch_name = "纽约时报"
 '''
 人民日报
 纽约时报
@@ -42,12 +42,16 @@ conn.close()
 
 # %%
 frame = pd.DataFrame(data, columns=['title', 'content', 'date'])
+# %% 月份统计
+frame['month'] = frame['date'].apply(lambda x: x.strftime('%Y-%m'))
+month_distr = frame["month"].loc[(frame["month"] <= "2020-02") & (frame["month"] >= "2019-02")].value_counts().sort_index()
+# month_distr = frame["month"].value_counts().sort_index()
 # %%
 all_content = ''
 all_title = ''
-for line in data:
-    all_content += line[1] + " "
-    all_title += line[0] + " "
+for index, line in frame.loc[(frame["month"] <= "2020-02") & (frame["month"] >= "2019-02")].iterrows():
+    all_content += line["content"] + " "
+    all_title += line["title"] + " "
 
 # %% 结巴分词
 sentence = all_title + all_content
@@ -75,11 +79,17 @@ for x in seg_list:
 word_freq = []
 hot_word2 = []
 for (k, v) in c.most_common(100):
+    if k not in hot_words:
+        continue
     hot_word2.append(k)
     word_freq.append(v)
     pass
     # print('%s%s %s  %d' % ('  '*(5-len(k)), k, '*'*int(v/3), v))
 
+with open('output/%s_words.csv' % name, 'w', encoding='gbk') as f:
+    f.write('关键词, 词频\n')
+    for i in zip(hot_word2, word_freq):
+        f.write('%s, %d\n' % i)
 # %% 词云
 word_str = ' '.join(hot_words)
 w = wordcloud.WordCloud(width=1000, height=700,
@@ -109,11 +119,12 @@ plt.title("%s新闻报道词频统计图" % ch_name)
 plt.grid(axis="y")
 plt.savefig('output/%s_wordfreq.png'% name, dpi=300)
 
-# %% 月份统计
-frame['month'] = frame['date'].apply(lambda x: x.strftime('%Y-%m'))
-month_distr = frame["month"].loc[frame["month"] <= "2020-02"].value_counts().sort_index()
-# month_distr = frame["month"].value_counts().sort_index()
-# %%
+
+# %% 报道数量
+with open('output/%s_counts.csv' % name, 'w', encoding='gbk') as f:
+    f.write('月份, 数量\n')
+    for i in zip(month_distr.index, month_distr):
+        f.write('%s, %d\n' % i)
 plt.figure()
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['figure.dpi'] = 300
@@ -129,7 +140,7 @@ subjects = []
 with open('./subject.txt',encoding='utf8') as f:
     for line in f.readlines():
         subjects.append(line.strip().split(','))
-print(subjects)
+# print(subjects)
 # %%
 sub_count = []
 for subject in subjects:

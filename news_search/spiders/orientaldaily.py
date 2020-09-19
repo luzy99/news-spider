@@ -23,7 +23,7 @@ class OrientaldailySpider(scrapy.Spider):
         conn = pymysql.connect(host=settings.MYSQL_HOST, user=settings.MYSQL_USER,
                                passwd=settings.MYSQL_PASSWD, db=settings.MYSQL_DBNAME, charset='utf8')
         cur = conn.cursor()
-        sql = "SELECT url FROM google WHERE site = '{}'".format(
+        sql = "SELECT url FROM google WHERE site = '{}' and keyword != '逃犯条例'".format(
             "orientaldaily.on.cc")
         cur.execute(sql)
         data = cur.fetchall()

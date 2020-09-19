@@ -4,6 +4,7 @@ import time
 from bs4 import BeautifulSoup
 from ..items import SearchResultItem
 import re
+import random
 
 
 class GoogleSpider(scrapy.Spider):
@@ -16,8 +17,11 @@ class GoogleSpider(scrapy.Spider):
     }
     kw = ''  # 搜索关键词
     site = ''  # 搜索站点
-    altUrl = 'www.google.com.hk'
-    baseUrl = 'https://%s/search?q=site:{site}+{kw}&filter=0&num=100&sourceid=chrome' % altUrl
+    altUrl = 'gug1.icu'
+    # gogoo.ml
+    # gug1.icu
+    baseUrl = 'https://%s/search?q=site:{site}+{kw}&filter=0&num=100&sourceid=chrome&start=0' % altUrl
+    baseUrl += '&tbs=cdr%3A1%2Ccd_min%3A3%2F1%2F2019%2Ccd_max%3A2%2F29%2F2020'   # 限定日期
     page = 1
 
     # scrapy crawl google -a kw=xxx -a site=xxx
@@ -76,7 +80,7 @@ class GoogleSpider(scrapy.Spider):
             if nextUrl is not None:
                 nextUrl = response.urljoin(nextUrl)
                 # print(nextUrl)
-                time.sleep(5)
+                time.sleep(random.randint(6,10))
                 self.page += 1
                 print('【page %d】' % self.page)
                 yield scrapy.Request(nextUrl, callback=self.parse, dont_filter=True, headers=self.headers)
